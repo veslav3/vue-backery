@@ -55,10 +55,34 @@ export const useCart = () => {
     }
   };
 
+  const removeFromCart = async (productId: string) => {
+    if (!token.value) {
+      await login();
+    }
+
+    if (token.value) {
+      loading.value = true;
+      try {
+        const data = await $fetch<Cart>(`/api/cart/items/${productId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token.value}`
+          }
+        });
+        cart.value = data;
+      } catch (err) {
+        console.error('Failed to remove from cart', err);
+      } finally {
+        loading.value = false;
+      }
+    }
+  };
+
   return {
     cart,
     loading,
     fetchCart,
-    addToCart
+    addToCart,
+    removeFromCart
   };
 };

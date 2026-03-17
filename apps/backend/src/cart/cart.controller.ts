@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { MockAuthGuard } from '../auth/mock-auth.guard';
 import type { AddToCartDto, Cart } from '@vue-backery/shared';
@@ -22,5 +22,10 @@ export class CartController {
   @Post('items')
   addToCart(@Request() req: AuthenticatedRequest, @Body() addToCartDto: AddToCartDto): Cart {
     return this.cartService.addToCart(req.user.id, addToCartDto);
+  }
+
+  @Delete('items/:productId')
+  removeFromCart(@Request() req: AuthenticatedRequest, @Param('productId') productId: string): Cart {
+    return this.cartService.removeFromCart(req.user.id, productId);
   }
 }

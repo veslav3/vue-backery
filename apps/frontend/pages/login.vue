@@ -15,17 +15,35 @@
       <div v-else>
         <div class="icon-header">👤</div>
         <h2>Inloggen</h2>
-        <p>Dit is een mock-login. Klik op de knop om direct in te loggen en producten aan je winkelmandje te kunnen toevoegen.</p>
+        <p>Log in om producten aan je winkelmandje te kunnen toevoegen.</p>
         
-        <div class="actions">
-          <button @click="handleLogin" class="btn primary-btn">Mock Login Activeren</button>
-        </div>
+        <form @submit.prevent="handleLogin" class="login-form">
+          <div class="form-group">
+            <label for="username">Gebruikersnaam</label>
+            <input type="text" id="username" v-model="username" required placeholder="Bijv. Henk" />
+          </div>
+          <div class="form-group">
+            <label for="password">Wachtwoord</label>
+            <input type="password" id="password" v-model="password" required />
+          </div>
+          
+          <div v-if="errorMsg" class="error-msg">
+            {{ errorMsg }}
+          </div>
+          
+          <div class="actions">
+            <button type="submit" class="btn primary-btn" :disabled="isLoading">
+              {{ isLoading ? 'Bezig...' : 'Inloggen' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useAuth } from '~/composables/useAuth';
 import { useCart } from '~/composables/useCart';
 import { useRouter } from 'nuxt/app';
@@ -34,10 +52,22 @@ const { token, user, login, logout } = useAuth();
 const { cart } = useCart();
 const router = useRouter();
 
+const username = ref('');
+const password = ref('');
+const errorMsg = ref('');
+const isLoading = ref(false);
+
 const handleLogin = async () => {
-  await login();
-  // Optional: redirect to assortiment automatically after login
-  // router.push('/assortiment');
+  errorMsg.value = '';
+  isLoading.value = true;
+  
+  const result = await login(username.value, password.value);
+  
+  isLoading.value = false;
+  
+  if (result !== true) {
+    errorMsg.value = result as string;
+  }
 };
 
 const handleLogout = () => {
@@ -47,6 +77,9 @@ const handleLogout = () => {
     cart.value.items = [];
     cart.value.total = 0;
   }
+  username.value = '';
+  password.value = '';
+  errorMsg.value = '';
 };
 </script>
 
@@ -124,5 +157,49 @@ const handleLogout = () => {
 .outline-btn:hover {
   background-color: #e74c3c;
   color: white;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.form-group input {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #2c3e50;
+}
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  padding: 0.8rem;
+  background-color: #fdf0ed;
+  border-radius: 6px;
+  border-left: 4px solid #e74c3c;
+  margin-bottom: 1rem;
 }
 </style>

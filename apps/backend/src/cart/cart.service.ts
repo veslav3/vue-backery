@@ -24,7 +24,12 @@ export class CartService {
     if (existingItemIndex > -1) {
       // Update quantity
       cart.items[existingItemIndex].quantity += addToCartDto.quantity;
-    } else {
+      
+      // Remove item if quantity drops to 0 or below
+      if (cart.items[existingItemIndex].quantity <= 0) {
+        cart.items.splice(existingItemIndex, 1);
+      }
+    } else if (addToCartDto.quantity > 0) {
       // Add new item
       const newItem: CartItem = {
         productId: addToCartDto.productId,
@@ -37,6 +42,21 @@ export class CartService {
 
     // Recalculate total
     this.recalculateTotal(cart);
+
+    return cart;
+  }
+
+  removeFromCart(userId: string, productId: string): Cart {
+    const cart = this.getCart(userId);
+
+    // Filter out the item to be removed
+    const initialLength = cart.items.length;
+    cart.items = cart.items.filter((item) => item.productId !== productId);
+
+    // Only recalculate if an item was actually removed
+    if (cart.items.length !== initialLength) {
+      this.recalculateTotal(cart);
+    }
 
     return cart;
   }

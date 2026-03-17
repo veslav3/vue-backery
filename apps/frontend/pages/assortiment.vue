@@ -6,8 +6,26 @@
       
       <!-- Cart Status Display (Simple) -->
       <div class="cart-status" v-if="cart">
-        <span>🛒 Winkelmandje: {{ cartItemsCount }} item(s)</span>
-        <span class="total">Totaal: €{{ formattedTotal }}</span>
+        <div class="cart-summary">
+          <span>🛒 Winkelmandje: {{ cartItemsCount }} item(s)</span>
+          <span class="total">Totaal: €{{ formattedTotal }}</span>
+        </div>
+        
+        <!-- Cart Items List -->
+        <div class="cart-items" v-if="cart.items && cart.items.length > 0">
+          <div v-for="item in cart.items" :key="item.productId" class="cart-item">
+            <span class="item-name">{{ item.name }}</span>
+            <div class="item-controls">
+              <button @click="handleUpdateQuantity(item, -1)" class="qty-btn" :disabled="loading" aria-label="Verminderen" title="Verminderen">-</button>
+              <span class="item-qty">{{ item.quantity }}</span>
+              <button @click="handleUpdateQuantity(item, 1)" class="qty-btn" :disabled="loading" aria-label="Vermeerderen" title="Vermeerderen">+</button>
+            </div>
+            <span class="item-price">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+            <button @click="handleRemoveFromCart(item.productId)" class="remove-btn" :disabled="loading" aria-label="Verwijderen" title="Verwijderen">
+              ❌
+            </button>
+          </div>
+        </div>
       </div>
       <div class="cart-status empty" v-else>
         <span>🛒 Winkelmandje (Laden...)</span>
@@ -45,7 +63,7 @@ import type { AddToCartDto } from '@vue-backery/shared';
 
 // Initialize Composables
 const { login } = useAuth();
-const { cart, loading, fetchCart, addToCart } = useCart();
+const { cart, loading, fetchCart, addToCart, removeFromCart } = useCart();
 
 // Fetch initial data smoothly gracefully handling mock auth
 onMounted(async () => {
@@ -71,6 +89,19 @@ const products: AddToCartDto[] = [
 
 const handleAddToCart = async (product: AddToCartDto) => {
   await addToCart(product);
+};
+
+const handleRemoveFromCart = async (productId: string) => {
+  await removeFromCart(productId);
+};
+
+const handleUpdateQuantity = async (item: any, change: number) => {
+  await addToCart({
+    productId: item.productId,
+    name: item.name,
+    price: item.price,
+    quantity: change
+  });
 };
 
 // Computed Helpers for the UI
@@ -111,21 +142,123 @@ const formattedTotal = computed(() => {
 
 .cart-status {
   margin-top: 1.5rem;
-  display: inline-flex;
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
   background-color: #f8f9fa;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem;
   border-radius: 8px;
   border: 1px solid #e9ecef;
-  font-weight: 500;
   color: #495057;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cart-summary {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .cart-status .total {
   color: #e67e22; /* Warning orange for emphasis */
   font-weight: 700;
-  font-size: 1.1rem;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+  gap: 1rem;
+}
+
+.item-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+  color: #343a40;
+}
+
+.item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn {
+  background-color: #f1f3f5;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  color: #495057;
+  transition: background-color 0.2s;
+}
+
+.qty-btn:hover:not(:disabled) {
+  background-color: #e2e6ea;
+  color: #212529;
+}
+
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.item-qty {
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 60px;
+  text-align: right;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.1s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-btn:hover:not(:disabled) {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
 }
 
 .product-grid {
