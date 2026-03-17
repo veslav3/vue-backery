@@ -1,5 +1,18 @@
 <script setup lang="ts">
-// AppHeader Component
+import { computed, onMounted } from 'vue';
+import { useCart } from '~/composables/useCart';
+
+const { cart, fetchCart } = useCart();
+
+// Fetch initial cart state for the header badge
+onMounted(async () => {
+  await fetchCart();
+});
+
+const cartItemsCount = computed(() => {
+  if (!cart.value?.items) return 0;
+  return cart.value.items.reduce((sum, item) => sum + item.quantity, 0);
+});
 </script>
 
 <template>
@@ -22,7 +35,7 @@
         <!-- Left Nav -->
         <ul class="nav-list left-nav">
           <li><NuxtLink to="/" class="icon-link">🏠</NuxtLink></li>
-          <li><NuxtLink to="/zuurdesem">ASSORTIMENT</NuxtLink></li>
+          <li><NuxtLink to="/assortiment">ASSORTIMENT</NuxtLink></li>
           <li><NuxtLink to="/zuurdesem">ONZE SPECIALS</NuxtLink></li>
         </ul>
 
@@ -40,10 +53,10 @@
         <ul class="nav-list right-nav">
           <li><NuxtLink to="/over-ons">OVER ONS</NuxtLink></li>
           <li><NuxtLink to="/zuurdesem">CONTACT</NuxtLink></li>
-          <li><NuxtLink to="/zuurdesem" class="icon-link">👤</NuxtLink></li>
+          <li><NuxtLink to="/login" class="icon-link">👤</NuxtLink></li>
           <li>
-            <NuxtLink to="/zuurdesem" class="cart-link icon-link">
-              🛒 <span class="cart-badge">0</span>
+            <NuxtLink to="/assortiment" class="cart-link icon-link">
+              🛒 <span class="cart-badge">{{ cartItemsCount }}</span>
             </NuxtLink>
           </li>
         </ul>
