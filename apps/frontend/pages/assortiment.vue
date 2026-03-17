@@ -28,7 +28,8 @@
         </div>
       </div>
       <div class="cart-status empty" v-else>
-        <span>🛒 Winkelmandje (Laden...)</span>
+        <span v-if="!token">🛒 Winkelmandje (Log in om te bekijken)</span>
+        <span v-else>🛒 Winkelmandje (Leeg of aan het laden...)</span>
       </div>
     </div>
 
@@ -62,12 +63,11 @@ import { useAuth } from '~/composables/useAuth';
 import type { AddToCartDto } from '@vue-backery/shared';
 
 // Initialize Composables
-const { login } = useAuth();
+const { token } = useAuth();
 const { cart, loading, fetchCart, addToCart, removeFromCart } = useCart();
 
 // Fetch initial data smoothly gracefully handling mock auth
 onMounted(async () => {
-  await login();
   await fetchCart();
 });
 

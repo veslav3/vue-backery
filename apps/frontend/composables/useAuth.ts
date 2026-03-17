@@ -7,6 +7,10 @@ export const useAuth = () => {
 
   const login = async (username?: string, password?: string) => {
     try {
+      if (!username || !password) {
+        return 'Username and password are required';
+      }
+
       // If we already have a token, we don't strictly need to login again.
       if (!token.value) {
         const response = await $fetch<AuthResponse>('/api/auth/login', {

@@ -1,15 +1,17 @@
-import { useState } from 'nuxt/app';
+import { useState, useRouter } from 'nuxt/app';
 import { useAuth } from './useAuth';
 import type { Cart, AddToCartDto } from '@vue-backery/shared';
 
 export const useCart = () => {
+  const router = useRouter();
   const cart = useState<Cart | null>('shopping_cart', () => null);
-  const { token, login } = useAuth();
+  const { token } = useAuth();
   const loading = useState<boolean>('cart_loading', () => false);
 
   const fetchCart = async () => {
     if (!token.value) {
-      await login();
+      cart.value = null;
+      return;
     }
     
     if (token.value) {
@@ -32,7 +34,8 @@ export const useCart = () => {
   const addToCart = async (product: AddToCartDto) => {
     // Ensure we are logged in before adding
     if (!token.value) {
-      await login();
+      router.push('/login');
+      return;
     }
 
     if (token.value) {
@@ -57,7 +60,7 @@ export const useCart = () => {
 
   const removeFromCart = async (productId: string) => {
     if (!token.value) {
-      await login();
+      return;
     }
 
     if (token.value) {
