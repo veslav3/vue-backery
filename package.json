@@ -1,20 +1,18 @@
 {
-  "name": "vue-backery",
-  "version": "0.0.0",
+  "name": "vue-backery-workspace",
   "private": true,
-  "type": "module",
   "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "dev:frontend": "pnpm --filter @vue-backery/frontend dev",
+    "dev:backend": "pnpm --filter backend start:dev",
+    "dev": "pnpm --parallel run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint"
   },
-  "dependencies": {
-    "nuxt": "^3.15.4",
-    "vue": "latest",
-    "vue-router": "latest"
+  "pnpm": {
+    "overrides": {
+      "serialize-javascript": "^7.0.3",
+      "ajv": "^8.18.0"
+    }
   },
-  "devDependencies": {},
   "packageManager": "pnpm@10.31.0+sha512.e3927388bfaa8078ceb79b748ffc1e8274e84d75163e67bc22e06c0d3aed43dd153151cbf11d7f8301ff4acb98c68bdc5cadf6989532801ffafe3b3e4a63c268"
 }
