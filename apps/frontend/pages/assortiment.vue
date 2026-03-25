@@ -3,53 +3,58 @@
     <div class="header">
       <h1>Ons Assortiment</h1>
       <p>Vers gebakken, speciaal voor u.</p>
-      
-      <!-- Cart Status Display (Simple) -->
-      <div class="cart-status" v-if="cart">
-        <div class="cart-summary">
-          <span>🛒 Winkelmandje: {{ cartItemsCount }} item(s)</span>
-          <span class="total">Totaal: €{{ formattedTotal }}</span>
-        </div>
-        
-        <!-- Cart Items List -->
-        <div class="cart-items" v-if="cart.items && cart.items.length > 0">
-          <div v-for="item in cart.items" :key="item.productId" class="cart-item">
-            <span class="item-name">{{ item.name }}</span>
-            <div class="item-controls">
-              <button @click="handleUpdateQuantity(item, -1)" class="qty-btn" :disabled="loading" aria-label="Verminderen" title="Verminderen">-</button>
-              <span class="item-qty">{{ item.quantity }}</span>
-              <button @click="handleUpdateQuantity(item, 1)" class="qty-btn" :disabled="loading" aria-label="Vermeerderen" title="Vermeerderen">+</button>
+    </div>
+
+    <div class="main-content">
+      <div class="products-section">
+        <div class="product-grid">
+          <!-- Product Card -->
+          <div v-for="product in products" :key="product.productId" class="product-card">
+            <div class="product-image">
+              <div class="image-placeholder">🥐</div>
             </div>
-            <span class="item-price">€{{ (item.price * item.quantity).toFixed(2) }}</span>
-            <button @click="handleRemoveFromCart(item.productId)" class="remove-btn" :disabled="loading" aria-label="Verwijderen" title="Verwijderen">
-              ❌
-            </button>
+            <div class="product-info">
+              <h2>{{ product.name }}</h2>
+              <p class="price">€{{ product.price.toFixed(2) }}</p>
+              <button 
+                @click="handleAddToCart(product)" 
+                :disabled="loading"
+                class="add-btn"
+              >
+                {{ loading ? 'Toevoegen...' : 'In winkelmandje' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-      <div class="cart-status empty" v-else>
-        <span v-if="!token">🛒 Winkelmandje (Log in om te bekijken)</span>
-        <span v-else>🛒 Winkelmandje (Leeg of aan het laden...)</span>
-      </div>
-    </div>
 
-    <div class="product-grid">
-      <!-- Product Card -->
-      <div v-for="product in products" :key="product.productId" class="product-card">
-        <div class="product-image">
-          <!-- Placeholder using a generic croissant emoji/color or you can replace with real images later -->
-          <div class="image-placeholder">🥐</div>
+      <div class="cart-sidebar">
+        <!-- Cart Status Display -->
+        <div class="cart-status" v-if="cart">
+          <div class="cart-summary">
+            <span>🛒 Winkelmandje: {{ cartItemsCount }} item(s)</span>
+            <span class="total">Totaal: €{{ formattedTotal }}</span>
+          </div>
+          
+          <!-- Cart Items List -->
+          <div class="cart-items" v-if="cart.items && cart.items.length > 0">
+            <div v-for="item in cart.items" :key="item.productId" class="cart-item">
+              <span class="item-name">{{ item.name }}</span>
+              <div class="item-controls">
+                <button @click="handleUpdateQuantity(item, -1)" class="qty-btn" :disabled="loading" aria-label="Verminderen" title="Verminderen">-</button>
+                <span class="item-qty">{{ item.quantity }}</span>
+                <button @click="handleUpdateQuantity(item, 1)" class="qty-btn" :disabled="loading" aria-label="Vermeerderen" title="Vermeerderen">+</button>
+              </div>
+              <span class="item-price">€{{ (item.price * item.quantity).toFixed(2) }}</span>
+              <button @click="handleRemoveFromCart(item.productId)" class="remove-btn" :disabled="loading" aria-label="Verwijderen" title="Verwijderen">
+                ❌
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="product-info">
-          <h2>{{ product.name }}</h2>
-          <p class="price">€{{ product.price.toFixed(2) }}</p>
-          <button 
-            @click="handleAddToCart(product)" 
-            :disabled="loading"
-            class="add-btn"
-          >
-            {{ loading ? 'Toevoegen...' : 'In winkelmandje' }}
-          </button>
+        <div class="cart-status empty" v-else>
+          <span v-if="!token">🛒 Winkelmandje (Log in om te bekijken)</span>
+          <span v-else>🛒 Winkelmandje (Leeg of aan het laden...)</span>
         </div>
       </div>
     </div>
@@ -140,8 +145,31 @@ const formattedTotal = computed(() => {
   font-size: 1.1rem;
 }
 
+.main-content {
+  display: flex;
+  flex-direction: column-reverse; /* Puts sidebar on top on mobile */
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+    flex-direction: row; /* Sidebar goes to right on desktop within natural DOM order */
+    align-items: flex-start;
+  }
+  
+  .products-section {
+    flex: 1;
+  }
+  
+  .cart-sidebar {
+    width: 380px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+  }
+}
+
 .cart-status {
-  margin-top: 1.5rem;
   display: flex;
   flex-direction: column;
   background-color: #f8f9fa;
@@ -149,9 +177,7 @@ const formattedTotal = computed(() => {
   border-radius: 8px;
   border: 1px solid #e9ecef;
   color: #495057;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
 }
 
 .cart-summary {
